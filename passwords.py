@@ -1,5 +1,7 @@
 import random
 import string
+from datetime import datetime, tzinfo, timedelta
+
 import requests.exceptions
 from bs4 import BeautifulSoup
 import urllib.request
@@ -36,7 +38,104 @@ no_say_good = [
     "My favorite color is ",
     "Bro, are you listening? This is the password, it's not something like ",
     "According to all known laws of aviation, there is no way a bee should be able to ",
-    "No one will be able to type my password in because they'll cringe typing the word Tumblr and also "
+    "No one will be able to type my password in because they'll cringe typing the word Tumblr and also ",
+    "Actually, it's pronounced "
+]
+
+major_arcana = [
+    "The Fool",
+    "The Magician",
+    "The High Priestess",
+    "The Empress",
+    "The Emperor",
+    "The Hierophant",
+    "The Lovers",
+    "The Chariot",
+    "Strength",
+    "The Hermit",
+    "Wheel of Fortune",
+    "Justice",
+    "The Hanged Man",
+    "Death",
+    "Temperance",
+    "The Devil",
+    "The Tower",
+    "The Star",
+    "The Moon",
+    "The Sun",
+    "Judgement",
+    "The World"
+]
+
+suits = [
+    "Wands",
+    "Cups",
+    "Swords",
+    "Coins"
+]
+
+ranks = [
+    "Ace",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
+    "Ten",
+    "Page",
+    "Knight",
+    "Queen",
+    "King"
+]
+
+class Central(tzinfo):
+
+    def utcoffset(self, dt):
+        return timedelta(hours=-6) + self.dst(dt)
+
+    def dst(self, dt):
+        d = datetime(dt.year, 3, 8)  # 2nd Sunday in March
+        self.dston = d + timedelta(days=6-d.weekday())
+        d = datetime(dt.year, 11, 1)  # 1st Sunday in Nov
+        self.dstoff = d + timedelta(days=6-d.weekday())
+        if self.dston <= dt.replace(tzinfo=None) < self.dstoff:
+            return timedelta(hours=1)
+        else:
+            return timedelta(0)
+
+    def tzname(self, dt):
+        return 'Central'
+
+EMOJI_RANGES_UNICODE = [
+    ('\U0001F300', '\U0001F320'),
+    ('\U0001F330', '\U0001F335'),
+    ('\U0001F337', '\U0001F37C'),
+    ('\U0001F380', '\U0001F393'),
+    ('\U0001F3A0', '\U0001F3C4'),
+    ('\U0001F3C6', '\U0001F3CA'),
+    ('\U0001F3E0', '\U0001F3F0'),
+    ('\U0001F400', '\U0001F43E'),
+    ('\U0001F440', '\U0001F4F7'),
+    ('\U0001F4F9', '\U0001F4FC'),
+    ('\U0001F500', '\U0001F53C'),
+    ('\U0001F540', '\U0001F543'),
+    ('\U0001F550', '\U0001F567'),
+    ('\U0001F5FB', '\U0001F5FF'),
+    ('\U0001F300', '\U0001F32C'),
+    ('\U0001F330', '\U0001F37D'),
+    ('\U0001F380', '\U0001F3CE'),
+    ('\U0001F3D4', '\U0001F3F7'),
+    ('\U0001F400', '\U0001F4FE'),
+    ('\U0001F500', '\U0001F54A'),
+    ('\U0001F550', '\U0001F579'),
+    ('\U0001F57B', '\U0001F5A3'),
+    ('\U0001F5A5', '\U0001F5FF'),
+    ('\U0001F300', '\U0001F579'),
+    ('\U0001F57B', '\U0001F5A3'),
+    ('\U0001F5A5', '\U0001F5FF')
 ]
 
 # Pure and simple, can't be cracked
@@ -112,7 +211,7 @@ def pass8():
     return "def pass1():\n\treturn \"password\"\n\tgenerators.append(pass1)"
 generators.append(pass8)
 
-# Make your password more difficult to communicate
+# Makes your password more difficult to communicate
 def pass9():
     return "Your new password is \"" + no_say_good[random.randrange(len(no_say_good))] + pass3(20, False, False) + "\""
 generators.append(pass9)
@@ -209,9 +308,16 @@ def pass15():
     return pass2().upper()
 generators.append(pass15)
 
-# List comprehension in one line because I am a sadist
+# List comprehension in one "line" because I am a sadist
 def pass16():
-    return ''.join([str(random.randrange(10)) for i in range(20)])
+    return ''.join(
+                    [
+                        (   list(string.ascii_lowercase) + \
+                            list(string.ascii_lowercase) + \
+                            [str(j) for j in range(10)] \
+                        )[random.randrange(26+26+10)] for i in range(20) \
+                    ]
+                  )
 generators.append(pass16)
 
 # Memory locations are basically random, right?
@@ -220,10 +326,46 @@ def pass17():
     return id(temp)
 generators.append(pass17)
 
-#
-def pass18():
-    return None
-generators.append(pass18)
+# The password contains instructions to celebrate your birthday and our failing democracy
+def pass18(num_dudes):
+    output = ""
+    for i in range(num_dudes):
+        output += "heckin vote dude "
+    return output
+generators.append(lambda: pass18(num_dudes=5))
+
+# Tarot cards are probably secure
+def pass19():
+    card = random.randrange(78)
+    if card < 22:
+        return major_arcana[card]
+    else:
+        return ranks[(card - 22) % 14] + " of " + suits[(card - 22) // 14]
+generators.append(pass19)
+
+# To remember your password you must unsolve a Junior Jumble
+def pass20(word):
+    output = ""
+    options = list(word)
+    while len(options) > 0:
+        output += options.pop(random.randrange(len(options)))
+    return output
+generators.append(lambda: pass20("Junior Jumble"))
+
+# How to not be drunk for Jesus: the password maker (but only in MN)
+def pass21(is_sacramental, is_jesus):
+    current = datetime.now(tz=Central())
+    if is_jesus:
+        return "the wine was inside you the whole time :)"
+    if is_sacramental:
+        return "Alright ya little rascal your password is " + pass3(20, True, False)
+    # 6 stands for Sunday
+    elif current.weekday() == 6 and current.hour > 2 and current.hour < 12 or \
+         current.weekday() != 6 and current.hour > 2 and current.hour < 8:
+        return "It is too holy for password generation"
+    else:
+        return pass3(20, True, False)
+generators.append(lambda: pass21(False, False))
 
 # For Taylor Swift fans: generates passwords using the lyrics to "22"
 def pass22(num_words, spaces):
@@ -237,6 +379,62 @@ def pass22(num_words, spaces):
         return output
 generators.append(lambda: pass22(4, True))
 
+# EMOJIS! ARE! PASSWORDS! :weary:
+def pass23():
+    my_dict = {}
+    sum = 0
+    for tup in EMOJI_RANGES_UNICODE: # 'tup dude
+        sum += 1 + ord(tup[1]) - ord(tup[0])
+        my_dict[sum] = tup
+    def gen_emoji():
+        my_emoji = random.randrange(sum)
+        prev_key = 0
+        for key in my_dict.keys():
+            if my_emoji <= key:
+                return chr(ord(my_dict[key][0]) + my_emoji - prev_key)
+            else:
+                prev_key = key
+    output = ""
+    for i in range(20):
+        output += gen_emoji()
+    return output
+generators.append(pass23)
+
+# A password generated by a password generator using password generators
+def pass24(num_words, spaces):
+    with open("passwords.py", 'r') as me:
+        options = me.read().split()
+        output = ""
+        for i in range(num_words):
+            output += options[random.randrange(len(options))]
+            if spaces and i < num_words - 1:
+                output += " "
+        return output
+generators.append(lambda: pass24(4, False))
+
+# Generates a PIN but very slowly
+def pass25():
+    num = random.randrange(9000)
+    output = 1000
+    while num > 0:
+        output += 1
+        num -= 1
+    return output
+generators.append(pass25)
+
+# Hashes your password because a hash is basically a password
+def pass26(password):
+    output = 0
+    for i in range(len(password)):
+        output += pow(2, i) * ord(password[i])
+    return str(output)
+generators.append(lambda: pass26(pass3(20, True, False)))
+
+# Generates a password by generating a password
+def pass49():
+    generator = generators[random.randrange(len(generators))]
+    return generator()
+
 # Outsource the labor to a different website!
 def pass50(length):
     resp = requests.get('http://www.random.org/passwords/?num=1&len=' + str(length) + '&format=html&rnd=new')
@@ -245,7 +443,7 @@ def pass50(length):
         nextind = resp.text.find("<li>", ind)
         return resp.text[nextind+4:nextind+4+length]
     else:
-        return "Fuck the Internet isn't loading guess your password will have to be " + pass1()
+        return "Fuck the Internet isn't loading guess your password will have to be \"" + pass1() + "\""
 generators.append(lambda: pass50(20))
 
 # Runs everything because we have ultimate power
