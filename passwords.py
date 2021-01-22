@@ -1,3 +1,5 @@
+import sys
+import time
 import random
 import string
 from datetime import datetime, tzinfo, timedelta
@@ -91,6 +93,8 @@ ranks = [
     "King"
 ]
 
+
+
 class Central(tzinfo):
 
     def utcoffset(self, dt):
@@ -136,6 +140,63 @@ EMOJI_RANGES_UNICODE = [
     ('\U0001F300', '\U0001F579'),
     ('\U0001F57B', '\U0001F5A3'),
     ('\U0001F5A5', '\U0001F5FF')
+]
+
+NINTENDO_BUTTONS = [
+    "UP",
+    "DOWN",
+    "LEFT",
+    "RIGHT",
+    "A",
+    "B",
+    "X",
+    "Y",
+    "R",
+    "ZR",
+    "L",
+    "ZL",
+    "C",
+    "Z",
+    "START",
+    "SELECT",
+    "+",
+    "-",
+    "LSTICK",
+    "RSTICK"
+]
+
+PERSONAL_QUESTIONS = [
+    "What is your name?",
+    "What is your quest?",
+    "What was the name of your first pet?",
+    "What is your mother's maiden name?",
+    "What was the name of your first-grade teacher?",
+    "What is your dream car model?",
+    "What is your street number?",
+    "What is your favorite color?",
+    "What is your least favorite color?",
+    "Who is your favorite Backyardigan?",
+    "What are the last 4 digits of your SSN?",
+    "What are the digits of your credit card number? Don't forget those three wacky digits on the back!",
+    "What is your favorite use for dijon mustard?",
+    "In a perfect world, how many bagles would you own?",
+    "How many fingers am I holding up?",
+    "Who is your favorite philosopher from 1266 A.D. to 1738? A.D.?",
+    "How many times have you wanted to meet Earnest Hemmingway?",
+    "On what day did you first realize that the Baskin Robins logo has a 31 in it?",
+    "What is your most embarrassing secret? Don't be shy :)",
+    "What is your 4chan username?",
+    "How many l's are in your favorite novel?",
+    "What is the cash price of unleaded gasoline per gallon at your nearest station?",
+    'How would you rate your pain on a 0 to 10 scale, where zero means "no pain," and 10 means "the worst possible pain."',
+    "How much wood would a woodchuck chuck if a woodchuck could chuck wood?",
+    "How do you get your weed? Hook a brother up...",
+    "Please rate how attractive you find the following letter: s",
+    "Please rate how attractive you find me ~uwu✿:",
+    "What happened to Amelia Earhart?",
+    "Why are you so sure that the Earth is round?",
+    "How ~shrexy~ do you feel on a day-to-day basis? 😉",
+    "Describe an example of your leadership experience in which you have positively influenced others, helped resolve disputes or contributed to group efforts over time."
 ]
 
 # Pure and simple, can't be cracked
@@ -429,6 +490,156 @@ def pass26(password):
         output += pow(2, i) * ord(password[i])
     return str(output)
 generators.append(lambda: pass26(pass3(20, True, False)))
+
+# long passwords are more secure
+# "Passwords must be fewer than 64 characters long? No fuk u"
+def pass27():
+    password = ["password"] * 50
+    return ''.join(password)
+generators.append(pass27)
+
+# They use math in cryptography so why not here
+# Sums are complicated, hold my beer
+def pass28():
+    password = 0
+    now = str(time.time())
+    for c in now:
+        if c != '.':
+            password += int(c)
+    return password
+generators.append(pass28)
+
+# 123456 and 12345678 are popular passwords - but why stop there?
+def pass29(max=10):
+    password = [str(x) for x in range(1,max+1)]
+    return ''.join(password)
+generators.append(lambda: pass29(20))
+
+# Generates a password using secret techniques from Olive Garden
+def pass30():
+    before = time.time()
+    x = input("Tell me when to stop adding parmesan to your password by pressing [enter]... ")
+    after = time.time()
+    return after - before
+generators.append(pass30)
+
+# Konami used this so its probably secure
+def pass31(length=10):
+    password = [NINTENDO_BUTTONS[random.randrange(len(NINTENDO_BUTTONS))] for x in range(length)]
+    return " ".join(password)
+generators.append(pass31)
+
+# security questions are secure for a reason - why not use it for your password?
+def pass32():
+    password = []
+    for i in range(3):
+        password.append(input(PERSONAL_QUESTIONS[random.randrange(len(PERSONAL_QUESTIONS))] + ' '))
+    return ''.join(password)
+generators.append(pass32)
+
+# Is your computer requiring you change your password every 90 days? Try this trick!
+def pass33(prev_password):
+    last_digit = prev_password[-1]
+    if last_digit.isdigit():
+        return prev_password[:-1] + str(int(last_digit) + 1)
+    else:
+        return prev_password + "1"
+generators.append(lambda: pass33("password5"))
+
+# The suspense is killing me
+def pass34():
+    print("You're so close to getting a brand new password!")
+    time.sleep(4)
+    print("Isn't it exciting?!")
+    time.sleep(4)
+    print("We're almost ready to make it...")
+    time.sleep(4)
+    print("Adding the finishing touches...")
+    time.sleep(4)
+    print("You can almost taste it!")
+    time.sleep(4)
+    print("Here comes the garnish!")
+    time.sleep(4)
+    print("Let's just take in the moment, shall we?")
+    time.sleep(4)
+    print("Okay. Deep breaths. Drumroll, please!")
+    time.sleep(4)
+    print("*drumroll sounds*")
+    time.sleep(4)
+    return pass1()
+generators.append(pass34)
+
+# Now the random has become the randee
+def pass35():
+    info = random.getstate()
+    return info[1][random.randrange(len(info[1]))]
+generators.append(pass35)
+
+# Multi-factor authentication (INTEGERS ONLY YOU DOOFUS)
+def pass36(num):
+    if not isinstance(num, int):
+        return None
+    now = 2
+    is_prime = True
+    while now <= num/2:
+        if num % now == 0:
+            is_prime = False
+            break
+        now += 1
+    if is_prime:
+        return "Multi-factor authentication failed; the input was single-factor"
+    else:
+        return "Input confirmed to be multi-factor"
+generators.append(lambda: pass36(1))
+
+# Kids are always on their instagraphs and snatchpats, maybe we can relate to them through photos?
+def pass37(filename):
+    password = []
+    with open(filename, "rb") as file:
+        for i in range(12):
+            byte = file.read(1)
+            int_byte = int.from_bytes(byte, byteorder=sys.byteorder, signed=False)
+            hex_str = hex(int_byte)[2:].zfill(2)
+            char1 = int(hex_str[0],16) % (127-33) + 33
+            char2 = int(hex_str[1],16) % (127-33) + 33
+            password.append(chr(char1))
+            password.append(chr(char2))
+    return ''.join(password)
+generators.append(lambda: pass37("important_password_source.png"))
+
+# Makes your very own alphabet song as a password
+def pass38():
+    alphabet = list(string.ascii_lowercase)
+    random.shuffle(alphabet)
+    return ''.join(alphabet)
+generators.append(pass38)
+
+# Generates passwords that show you just how confusing programming can be
+def pass39(num_pairs):
+    password = ''
+    l_left = r_left = num_pairs
+    while l_left > 0 or r_left > 0:
+        choice = random.randint(0, 1)
+        if choice == 0:
+            if l_left > 0:
+                password += '{'
+                l_left -= 1
+            else:
+                password += '}'
+                r_left -= 1
+        else:
+            if r_left > 0 and l_left < r_left:
+                password += '}'
+                r_left -= 1
+            else:
+                password += '{'
+                l_left -= 1
+    return password
+generators.append(lambda: pass39(10))
+
+#
+def pass40():
+    pass
 
 # Generates a password by generating a password
 def pass49():
